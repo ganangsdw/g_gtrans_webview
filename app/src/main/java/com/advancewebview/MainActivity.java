@@ -1,15 +1,20 @@
 package com.advancewebview;
 
+import android.Manifest;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.http.SslError;
 import android.os.Bundle;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
+import android.webkit.GeolocationPermissions;
 import android.webkit.SslErrorHandler;
+import android.webkit.WebChromeClient;
 import android.webkit.WebResourceError;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebResourceResponse;
@@ -48,6 +53,35 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         webView = (WebView) findViewById(R.id.sitesWebView);
         webView.setWebViewClient(new MyWebViewClient());
         webView.getSettings().setJavaScriptEnabled(true);
+        webView.getSettings().setGeolocationEnabled(true);
+        webView.getSettings().setJavaScriptCanOpenWindowsAutomatically(true);
+
+        webView.getSettings().setAppCacheEnabled(true);
+        webView.getSettings().setDatabaseEnabled(true);
+        webView.getSettings().setDomStorageEnabled(true);
+
+        ActivityCompat.requestPermissions(this, new String[]{
+                Manifest.permission.ACCESS_FINE_LOCATION,
+                Manifest.permission.ACCESS_COARSE_LOCATION
+        },0);
+
+        webView.setWebViewClient(new WebViewClient() {
+
+            @Override
+            public boolean shouldOverrideUrlLoading(WebView view, String url) {
+                view.loadUrl(url);
+                return true;
+            }
+        });
+
+        webView.setWebChromeClient(new WebChromeClient() {
+            @Override
+            public void onGeolocationPermissionsShowPrompt(final String origin,final GeolocationPermissions.Callback callback) {
+                Log.d("Location","callback");
+                callback.invoke(origin, true, false);
+            }
+        });
+
         LoadWebViewUrl(webViewUrl);
     }
 
@@ -173,7 +207,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             return true;
         else
             return false;
-
     }
 
 }
